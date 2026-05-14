@@ -1,0 +1,37 @@
+@using LogicLibrary.DTO.Models
+@using LogicLibrary.Logics
+
+<div class="food-card @(Food.Count > 0 ? "selected" : "")">
+    <div class="food-image-wrapper">
+        <img src="@Food.ImageUrl" alt="@Food.Name" class="food-image" loading="lazy" />
+        @if (Food.Count > 0)
+        {
+            <div class="food-badge">@Food.Count</div>
+        }
+    </div>
+
+    <div class="food-info">
+        <p class="food-name">@Food.Name</p>
+        <p class="food-category">@Food.Category</p>
+        <p class="food-kcal-each">@Food.CaloriesPerServing kcal / serving</p>
+    </div>
+
+    <div class="food-counter">
+        <button class="counter-btn minus" @onclick="() => _foodSvc.Decrement(Food)" disabled="@(Food.Count == 0)">−</button>
+        <span class="counter-value">@Food.Count</span>
+        <button class="counter-btn plus" @onclick="() => _foodSvc.Increment(Food)">+</button>
+    </div>
+
+    @if (Food.Count > 0)
+    {
+        <div class="food-subtotal">
+            = @Food.TotalCalories kcal
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private FoodService _foodSvc { get; set; } = default!;
+    [Parameter, EditorRequired] public Food Food { get; set; } = default!;
+}
+

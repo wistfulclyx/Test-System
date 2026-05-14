@@ -1,0 +1,84 @@
+@page "/"
+@inject HttpClient Http
+@using LogicLibrary.Logics
+@using LogicLibrary.DTO.Models
+
+<PageTitle>Food Calorie Calculator</PageTitle>
+
+<div class="page-header">
+    <div class="header-content">
+        <h1 class="app-title">🥗 CaloriTrack</h1>
+        <p class="app-subtitle">Pick your meals, track your calories</p>
+    </div>
+</div>
+
+@if (_foodSvc.IsLoading)
+{
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading foods...</p>
+    </div>
+}
+else if (_foodSvc.ErrorMessage is not null)
+{
+    <div class="error-state">
+        <p>⚠️ @_foodSvc.ErrorMessage</p>
+    </div>
+}
+else
+{
+    <!-- Category filter pills -->
+    <div class="category-pills">
+        <button class="pill @(_foodSvc.SelectedCategory == null ? "active" : "")"
+                @onclick="() => _foodSvc.SelectCategory(null)">
+            All
+        </button>
+        @foreach (var cat in _foodSvc.Categories)
+        {
+            <button class="pill @(_foodSvc.SelectedCategory == cat ? "active" : "")"
+                    @onclick="() => _foodSvc.SelectCategory(cat)">
+                @cat
+            </button>
+        }
+    </div>
+
+    <!-- Food grid -->
+    <div class="food-grid">
+        @foreach (var food in _foodSvc.FilteredFoods)
+        {
+            <FoodCard Food="food" />
+        }
+    </div>
+}
+
+<!-- Sticky calorie bar -->
+<div class="calorie-bar @(_foodSvc.TotalCalories > 0 ? "visible" : "")">
+    <div class="calorie-bar-inner">
+        <div class="calorie-summary">
+            <span class="calorie-label">Total Calories</span>
+            <span class="calorie-value">@_foodSvc.TotalCalories <span class="calorie-unit">kcal</span></span>
+        </div>
+        <div class="calorie-actions">
+            <span class="selected-count">@_foodSvc.SelectedCount serving(s) selected</span>
+            <button class="reset-btn" @onclick="_foodSvc.ResetAll">Reset</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject] private FoodService _foodSvc { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await _foodSvc.LoadFoodsAsync(Http);
+        
+        _foodSvc.StateHasChanged += OnStateChanged;
+    }
+
+    private void OnStateChanged() => StateHasChanged();
+
+    public void Dispose()
+    {
+        _foodSvc.StateHasChanged -= OnStateChanged;
+    }
+}
