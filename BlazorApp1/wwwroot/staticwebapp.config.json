@@ -2,9 +2,12 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": [
-      "/_framework/*",
       "/data/*",
       "*.{css,js,ico,png,jpg,jpeg,gif,svg,wasm,dll}"
     ]
+  },
+  "mimeTypes": {
+    ".dll": "application/octet-stream",
+    ".wasm": "application/wasm"
   }
 }
